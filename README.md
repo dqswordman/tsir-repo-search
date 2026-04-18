@@ -5,6 +5,7 @@ This repository is the public artifact release for the paper draft:
 - [PDF draft](paper/esorics2026_lncs_draft.pdf)
 - [LaTeX source package](paper/latex/esorics2026_lncs_source.zip)
 - [Supplementary artifact bundle](paper/submission_artifact_bundle.zip)
+- [Release notes](RELEASE_NOTES.md)
 - [Artifact index](ARTIFACT_INDEX.md)
 
 ## What this repo contains

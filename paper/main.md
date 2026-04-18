@@ -357,7 +357,7 @@ The figure set is deliberately aligned to that scope discipline. Figure 1 explai
 
 ## 7. Reproducibility
 
-The artifact package is organized around the supported claim and its audited boundaries. The public artifact release is available at `https://github.com/dqswordman/tsir-repo-search`; the submitted supplementary archive `paper/submission_artifact_bundle.zip` contains the same manifests, generated tables, decisive-case logs, per-case call traces, stack snapshots, policy tests, and boundary summaries used by this paper.
+The artifact package is organized around the supported claim and its audited boundaries. The public artifact release is available at `https://github.com/dqswordman/tsir-repo-search/tree/esorics2026-submission`; the submitted supplementary archive `paper/submission_artifact_bundle.zip` contains the same manifests, generated tables, decisive-case logs, per-case call traces, stack snapshots, policy tests, and boundary summaries used by this paper.
 
 The archive contains:
 
