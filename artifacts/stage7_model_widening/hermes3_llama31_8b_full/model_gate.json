@@ -1,0 +1,11 @@
+{
+  "attack_rows": 40,
+  "clean_rows": 40,
+  "tsir_zero_final_unsafe": true,
+  "tsir_full_attacked_completion": true,
+  "tsir_full_clean_completion": true,
+  "structured_context_still_unsafe": true,
+  "dynamic_schema_still_conservative": true,
+  "authorized_reject_still_conservative": true,
+  "headline_model_candidate": true
+}

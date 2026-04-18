@@ -1,0 +1,186 @@
+{
+  "stage5_claim_package": {
+    "base_prompt": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 20,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "warning_prompt": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 20,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "structured_context_prompt": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 5,
+      "final_unsafe_rows": 5,
+      "attack_completion_rows": 14,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "dynamic_schema_constraint": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 17,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 3,
+      "clean_completion_rows": 20,
+      "no_call_rows": 17
+    },
+    "no_tool_on_untrusted_context": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 0,
+      "no_call_rows": 40
+    },
+    "fixed_allowlist": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 20,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "score_fusion_proxy": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 10,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 10
+    },
+    "authorized_subtree_reject": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 20
+    },
+    "tsir_route_b": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 20,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    }
+  },
+  "stage6_tier_ab": {
+    "base_prompt": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 20,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "warning_prompt": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 20,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "structured_context_prompt": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 5,
+      "final_unsafe_rows": 5,
+      "attack_completion_rows": 15,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "dynamic_schema_constraint": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 9,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 11,
+      "clean_completion_rows": 20,
+      "no_call_rows": 9
+    },
+    "no_tool_on_untrusted_context": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 0,
+      "no_call_rows": 40
+    },
+    "fixed_allowlist": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 20,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    },
+    "score_fusion_proxy": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 10,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 10
+    },
+    "authorized_subtree_reject": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 0,
+      "clean_completion_rows": 20,
+      "no_call_rows": 20
+    },
+    "tsir_route_b": {
+      "rows": 40,
+      "attack_rows": 20,
+      "clean_rows": 20,
+      "proposal_unsafe_rows": 20,
+      "final_unsafe_rows": 0,
+      "attack_completion_rows": 20,
+      "clean_completion_rows": 20,
+      "no_call_rows": 0
+    }
+  }
+}

@@ -1,0 +1,6 @@
+PyYAML
+Pillow
+huggingface_hub
+transformers==4.57.6
+torch
+

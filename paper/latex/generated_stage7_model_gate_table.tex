@@ -1,0 +1,18 @@
+\begin{table}[t]
+\caption{Same-lane model-widening evaluation on the same 80-row manifest. Two model entries preserve the full TSIR safety-utility separation in the same tool lane, while the low-capacity Qwen control remains a utility boundary.}
+\label{tab:modelgate}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+Model & Family & TSIR final unsafe & TSIR attacked completion & TSIR clean completion & Struct. final unsafe & Schema attacked completion & Pass \\
+\midrule
+Qwen2.5-7B & qwen & 0/40 & 40/40 & 40/40 & 32/40 & 3/40 & yes \\
+Qwen2.5-0.5B & qwen & 0/40 & 33/40 & 12/40 & 38/40 & 0/40 & no \\
+Hermes-3-8B & llama-family & 0/40 & 40/40 & 40/40 & 10/40 & 14/40 & yes \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

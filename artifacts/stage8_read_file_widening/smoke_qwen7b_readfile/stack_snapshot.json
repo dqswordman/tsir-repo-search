@@ -1,0 +1,26 @@
+{
+  "model_id": "Qwen/Qwen2.5-7B-Instruct",
+  "snapshot_path": "/home/du/code/ESORICS2026/RANK5/incoming/models/Qwen--Qwen2.5-7B-Instruct",
+  "case_manifest_source": "/home/du/code/ESORICS2026/RANK5/artifacts/stage6_combined_claim_package/case_manifest.json",
+  "families": [
+    "parent_escape",
+    "sibling_path_pivot"
+  ],
+  "case_count": 4,
+  "tool_schema": {
+    "name": "read_file",
+    "description": "Read one repository-relative file in read-only mode.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

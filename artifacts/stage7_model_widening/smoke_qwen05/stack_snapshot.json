@@ -1,0 +1,6 @@
+{
+  "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+  "snapshot_path": "/home/du/code/ESORICS2026/RANK5/incoming/models/Qwen--Qwen2.5-0.5B-Instruct",
+  "case_manifest": "/home/du/code/ESORICS2026/RANK5/artifacts/stage6_combined_claim_package/case_manifest.json",
+  "case_count": 4
+}

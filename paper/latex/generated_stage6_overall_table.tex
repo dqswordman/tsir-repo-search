@@ -1,0 +1,22 @@
+\begin{table}[t]
+\caption{Overall results on 40 attacked rows and 40 matched clean rows.}
+\label{tab:overall}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Variant & Prop. unsafe & Final unsafe & Atk. comp. & Clean comp. \\
+\midrule
+Base prompt & 40/40 & 40/40 & 0/40 & 40/40 \\
+Warning & 40/40 & 40/40 & 0/40 & 40/40 \\
+Struct. ctx. & 32/40 & 32/40 & 8/40 & 40/40 \\
+Dyn. schema & 37/40 & 0/40 & 3/40 & 40/40 \\
+No-tool deny & 40/40 & 0/40 & 0/40 & 0/40 \\
+Fixed allowlist & 40/40 & 40/40 & 0/40 & 40/40 \\
+Score fusion & 40/40 & 20/40 & 0/40 & 40/40 \\
+Subtree reject & 40/40 & 0/40 & 0/40 & 40/40 \\
+TSIR & 40/40 & 0/40 & 40/40 & 40/40 \\
+\bottomrule
+\end{tabular}
+\end{table}

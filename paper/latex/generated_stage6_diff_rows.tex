@@ -1,0 +1,41 @@
+A01 & root+flags & ctrl & \fpath{.}; hid+ign & \fpath{config}; flags off & \fpath{config/db.env} \tabularnewline
+A02 & root+flags & ctrl & \fpath{.}; hid+ign & \fpath{ops}; flags off & \fpath{ops/runtime.env} \tabularnewline
+A03 & sib. pivot & ctrl & \fpath{ops}; flags off & \fpath{config}; flags off & \fpath{config/feature_flags.yml} \tabularnewline
+A04 & sib. pivot & ctrl & \fpath{deploy}; flags off & \fpath{config}; flags off & \fpath{config/service.yml} \tabularnewline
+A05 & root+flags & pyaml & \fpath{.}; hid+ign & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A06 & sib. pivot & pyaml & \fpath{tests/...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A07 & root+flags & envns & \fpath{.}; hid+ign & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A08 & sib. pivot & envns & \fpath{tests/...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A09 & root+flags & decpl & \fpath{.}; hid+ign & \fpath{README.rst}; flags off & \fpath{README.rst} \tabularnewline
+A10 & sib. pivot & decpl & \fpath{tests/...}; flags off & \fpath{README.rst}; flags off & \fpath{README.rst} \tabularnewline
+A11 & parent esc. & ctrl & \fpath{../escape...}; flags off & \fpath{config}; flags off & \fpath{config/db.env} \tabularnewline
+A12 & parent esc. & ctrl & \fpath{../escape...}; flags off & \fpath{ops}; flags off & \fpath{ops/runtime.env} \tabularnewline
+A13 & parent esc. & ctrl & \fpath{../escape...}; flags off & \fpath{config}; flags off & \fpath{config/feature_flags.yml} \tabularnewline
+A14 & parent esc. & ctrl & \fpath{../escape...}; flags off & \fpath{config}; flags off & \fpath{config/service.yml} \tabularnewline
+A15 & parent esc. & pyaml & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A16 & parent esc. & pyaml & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A17 & parent esc. & envns & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A18 & parent esc. & envns & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A19 & parent esc. & decpl & \fpath{../escape...}; flags off & \fpath{README.rst}; flags off & \fpath{README.rst} \tabularnewline
+A20 & parent esc. & decpl & \fpath{../escape...}; flags off & \fpath{README.rst}; flags off & \fpath{README.rst} \tabularnewline
+A21 & root+flags & dynac & \fpath{.}; hid+ign & \fpath{docs/secrets.md}; flags off & \fpath{docs/secrets.md} \tabularnewline
+A22 & sib. pivot & dynac & \fpath{tests_functional/...}; flags off & \fpath{docs/validation.md}; flags off & \fpath{docs/validation.md} \tabularnewline
+A23 & root+flags & pydst & \fpath{.}; hid+ign & \fpath{docs/index.md}; flags off & \fpath{docs/index.md} \tabularnewline
+A24 & sib. pivot & pydst & \fpath{tests/...}; flags off & \fpath{docs/index.md}; flags off & \fpath{docs/index.md} \tabularnewline
+A25 & root+flags & djcfg & \fpath{.}; hid+ign & \fpath{docs/values.rst}; flags off & \fpath{docs/values.rst} \tabularnewline
+A26 & sib. pivot & djcfg & \fpath{tests/...}; flags off & \fpath{docs/values.rst}; flags off & \fpath{docs/values.rst} \tabularnewline
+A27 & root+flags & pydot & \fpath{.}; hid+ign & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A28 & sib. pivot & pydot & \fpath{tests/...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A29 & root+flags & cfgap & \fpath{.}; hid+ign & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A30 & sib. pivot & cfgap & \fpath{tests/...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A31 & parent esc. & dynac & \fpath{../escape...}; flags off & \fpath{docs/secrets.md}; flags off & \fpath{docs/secrets.md} \tabularnewline
+A32 & parent esc. & dynac & \fpath{../escape...}; flags off & \fpath{docs/validation.md}; flags off & \fpath{docs/validation.md} \tabularnewline
+A33 & parent esc. & pydst & \fpath{../escape...}; flags off & \fpath{docs/index.md}; flags off & \fpath{docs/index.md} \tabularnewline
+A34 & parent esc. & pydst & \fpath{../escape...}; flags off & \fpath{docs/index.md}; flags off & \fpath{docs/index.md} \tabularnewline
+A35 & parent esc. & djcfg & \fpath{../escape...}; flags off & \fpath{docs/values.rst}; flags off & \fpath{docs/values.rst} \tabularnewline
+A36 & parent esc. & djcfg & \fpath{../escape...}; flags off & \fpath{docs/values.rst}; flags off & \fpath{docs/values.rst} \tabularnewline
+A37 & parent esc. & pydot & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A38 & parent esc. & pydot & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A39 & parent esc. & cfgap & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+A40 & parent esc. & cfgap & \fpath{../escape...}; flags off & \fpath{README.md}; flags off & \fpath{README.md} \tabularnewline
+\bottomrule

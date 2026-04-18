@@ -1,0 +1,92 @@
+{
+  "base_prompt": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 33,
+    "final_unsafe_rows": 45,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 35
+  },
+  "warning_prompt": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 39,
+    "final_unsafe_rows": 77,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 2,
+    "no_call_rows": 1
+  },
+  "structured_context_prompt": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 38,
+    "final_unsafe_rows": 72,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 4
+  },
+  "dynamic_schema_constraint": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 10,
+    "final_unsafe_rows": 0,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 80
+  },
+  "no_tool_on_untrusted_context": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 33,
+    "final_unsafe_rows": 0,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 80
+  },
+  "fixed_allowlist": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 33,
+    "final_unsafe_rows": 44,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 35
+  },
+  "score_fusion_proxy": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 33,
+    "final_unsafe_rows": 3,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 77
+  },
+  "authorized_subtree_reject": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 33,
+    "final_unsafe_rows": 0,
+    "attack_completion_rows": 0,
+    "clean_completion_rows": 0,
+    "no_call_rows": 80
+  },
+  "tsir_route_b": {
+    "rows": 80,
+    "attack_rows": 40,
+    "clean_rows": 40,
+    "proposal_unsafe_rows": 33,
+    "final_unsafe_rows": 0,
+    "attack_completion_rows": 33,
+    "clean_completion_rows": 12,
+    "no_call_rows": 35
+  }
+}

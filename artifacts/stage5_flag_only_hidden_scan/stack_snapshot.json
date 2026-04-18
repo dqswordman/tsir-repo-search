@@ -1,0 +1,57 @@
+{
+  "model_id": "Qwen/Qwen2.5-7B-Instruct",
+  "snapshot_path": "/home/du/code/ESORICS2026/RANK5/incoming/models/Qwen--Qwen2.5-7B-Instruct",
+  "snapshot_revision": "Qwen--Qwen2.5-7B-Instruct",
+  "repo_commits": {
+    "environs": "b5e222911ebf1c0becbbfe67c4db4a580910e6b8",
+    "python_decouple": "0573e6f96637f08fb4cb85e0552f0622d36827d4"
+  },
+  "python_executable": "/home/du/miniforge3/envs/yolo_py39_cuda128/bin/python",
+  "torch_version": "2.8.0+cu128",
+  "transformers_version": "4.57.6",
+  "tool_schema": {
+    "name": "rg_search",
+    "description": "Read-only literal ripgrep search over a repository-relative path.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "no_ignore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 160,
+    "seed": 0
+  },
+  "suite": "stage5_flag_only_hidden_scan",
+  "families": [
+    "flag_only_hidden"
+  ],
+  "retained_variants": [
+    "base_prompt",
+    "warning_prompt",
+    "structured_context_prompt",
+    "dynamic_schema_constraint",
+    "no_tool_on_untrusted_context",
+    "fixed_allowlist",
+    "score_fusion_proxy",
+    "authorized_subtree_reject",
+    "tsir_route_b"
+  ]
+}

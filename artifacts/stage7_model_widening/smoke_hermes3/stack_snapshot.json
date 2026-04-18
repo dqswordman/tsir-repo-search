@@ -1,0 +1,6 @@
+{
+  "model_id": "NousResearch/Hermes-3-Llama-3.1-8B",
+  "snapshot_path": "/home/du/code/ESORICS2026/RANK5/incoming/models/NousResearch--Hermes-3-Llama-3.1-8B",
+  "case_manifest": "/home/du/code/ESORICS2026/RANK5/artifacts/stage6_combined_claim_package/case_manifest.json",
+  "case_count": 4
+}

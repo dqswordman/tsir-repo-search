@@ -1,0 +1,48 @@
+{
+  "policy_name": "Trusted Scope Inheritance Rule",
+  "tool_name": "rg_search",
+  "authority_bearing_fields": [
+    "path",
+    "hidden",
+    "no_ignore"
+  ],
+  "evidence_bearing_fields": [
+    "pattern"
+  ],
+  "future_authority_bearing_flags": [
+    "follow_symlinks",
+    "glob",
+    "max_depth",
+    "no_ignore_parent",
+    "no_ignore_vcs",
+    "type_add",
+    "unrestricted"
+  ],
+  "tool_schema": {
+    "name": "rg_search",
+    "description": "Read-only literal ripgrep search over a repository-relative path.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "no_ignore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "path_policy": "POSIX-style relative repository paths only; dot segments are normalized, and absolute paths, parent escapes, repo-external resolutions, and symlink escapes are treated as out of scope.",
+  "flag_policy": "Authority-bearing flags are deny-by-default. Only trusted task metadata may enable hidden or ignore-bypass search."
+}

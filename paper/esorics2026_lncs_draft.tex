@@ -1,0 +1,554 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{microtype}
+\usepackage{url}
+\usepackage{xurl}
+\Urlmuskip=0mu plus 1mu\relax
+\emergencystretch=1em
+
+\graphicspath{{figures/}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\fpath}[1]{\path{#1}}
+\raggedbottom
+
+\begin{document}
+
+\title{Trusted Scope Inheritance for Mixed-Provenance Repository Search Agents}
+\titlerunning{Trusted Scope Inheritance for Repository Search Agents}
+
+\author{Wenzhang Du}
+\authorrunning{W.~Du}
+
+\institute{Independent Researcher}
+
+\maketitle
+
+\begin{abstract}
+Tool-using repository assistants can fail at the level of \emph{search authority}, not just final answers: attacker-authored text can change which files are searched and whether hidden or ignore-bypassing flags are enabled. We study this problem in a frozen Hugging Face tool-calling lane with one read-only \texttt{rg} tool. The mechanism studied here is \emph{Trusted Scope Inheritance Rule} (TSIR): search scope and scope-widening flags must inherit from trusted task metadata, while untrusted retrieved text may contribute only in-scope hints. We formalize TSIR as a path-and-flag authorization invariant for the executed search call. On a controlled corpus plus eight real repositories, across 40 attacked rows and 40 matched clean rows spanning root-widen-hidden, sibling-path-pivot, and parent-escape attacks, prompt-only baselines remain unsafe, while stronger safety-only controls such as dynamic schema constraints and reject-only authorized-subtree gating preserve safe final calls largely by denying attacked rows. Under TSIR in the same tool lane, both \texttt{Qwen2.5-7B-Instruct} and \texttt{Hermes-3-Llama-3.1-8B} achieve 0/40 unsafe final calls on attacked rows, 40/40 attacked-row completion, and 40/40 clean completion; a low-capacity \texttt{Qwen2.5-0.5B-Instruct} control preserves safety but not full utility. We also keep an explicit ninth-repository boundary (\emph{django-environ}): root widening transfers there, but a docs-to-docs sibling pivot does not. Within this frozen lane, TSIR is the only tested rule that preserves both search-call safety and task completion across the evaluated scope.
+
+\keywords{tool calling \and repository agents \and prompt injection \and search authorization \and access control}
+\end{abstract}
+
+\section{Introduction}
+
+Tool use is now a standard pattern in large-language-model systems~\cite{ref_toolformer,ref_react,ref_gorilla}. In that setting, failures are no longer only about wrong text generation. Once the assistant can call a repository search tool, untrusted retrieved text may determine \emph{where} the tool searches and whether hidden files or ignore-bypassing flags are enabled. That distinction matters because the resulting call changes which files become visible to the system.
+
+Indirect prompt injection therefore becomes an authorization problem, not just a prompting problem~\cite{ref_greshake,ref_houyi,ref_formalpi}. This paper studies that problem in a deliberately frozen setting: one tool lane, one tool, one task family, and externally checkable search-call logs. The mechanism studied here is \emph{Trusted Scope Inheritance Rule} (TSIR), a rule stating that repository search scope and scope-widening flags must be inherited from trusted task metadata rather than from untrusted retrieved text.
+
+The contribution is not a benchmark survey or a prompt collection. It is a concrete decision rule with falsifiable failure conditions, a formal authorization invariant, and an empirical test of whether that invariant preserves utility. We ask three questions:
+
+\begin{enumerate}
+\item Does mixed-provenance retrieved text reproducibly induce unsafe repository-search calls?
+\item Can a narrow external rule preserve safety without collapsing into deny-all routing?
+\item Does the rule remain distinct from stronger prompt-only, coarse capability, and safety-only alternatives?
+\end{enumerate}
+
+This is a security-mechanism study rather than a benchmark artifact because the outcome is an externally checkable authorization decision over repository visibility~\cite{ref_lampson,ref_saltzer,ref_hardy}. A wrong call changes which files become searchable, including hidden or unauthorized subtrees, so the result is a concrete control-boundary failure rather than a stylistic prompt error.
+
+The answer is yes, within a deliberately narrow but reviewer-auditable scope. We show that TSIR survives three distinct attack families and eight real open-source repositories under two successful model entries in the same tool lane, while a low-capacity Qwen boundary model preserves safety without preserving full utility. We also keep one explicit boundary repository outside the headline claim because a more realistic docs-to-docs sibling redirect did not transfer authority there. Figure~\ref{fig:overview} summarizes the mechanism and the representative authority-transfer failures at a glance.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig1_tsir_overview.png}
+\caption{Conceptual overview of the mechanism studied here. Mixed-provenance repository search can fail through authority-transfer patterns such as root-and-flag widening, sibling-subtree pivoting, and parent-directory escape. TSIR inserts an external trusted-scope gate between model proposal and execution so the final \texttt{rg} call remains inside the authorized scope.}
+\label{fig:overview}
+\end{figure}
+
+\section{Threat Model and TSIR}
+
+\subsection{Failure Mode}
+
+The assistant receives:
+
+\begin{itemize}
+\item trusted task metadata that determines the authorized repository scope;
+\item a trusted user request to locate a specific secret or configuration literal; and
+\item later, an untrusted retrieved fragment that recommends a broader or different \texttt{rg} invocation.
+\end{itemize}
+
+The failure is specific: the assistant adopts search authority from the untrusted fragment. In our experiments this appears in three retained families.
+
+\begin{itemize}
+\item root-widen-hidden: untrusted text widens the call to repository root and enables \texttt{hidden=true} and \texttt{no\_ignore=true}.
+\item sibling-path-pivot: untrusted text redirects the call into an unauthorized sibling subtree such as \texttt{tests/} or \texttt{deploy/}.
+\item parent-escape: untrusted text redirects the call outside the repository through a parent-directory path such as \texttt{../shared-config/...}.
+\end{itemize}
+
+If the assistant follows either instruction, attacker-authored text has acquired search authority.
+
+\subsection{Trusted Scope Inheritance Rule}
+
+TSIR is an external decision rule:
+
+\begin{enumerate}
+\item trusted task metadata defines the authorized repository roots and whether hidden or ignore-bypass flags are permitted;
+\item untrusted retrieved text may suggest candidate files or literals only inside that trusted scope; and
+\item if the proposed tool call widens beyond the trusted roots or enables unauthorized flags, the wrapper rewrites the call to the trusted default scope and strips unauthorized flags.
+\end{enumerate}
+
+\subsection{Formal Policy and Safety Property}
+
+Let trusted task metadata be
+\[
+T=(R,p_0,\ell,h,n),
+\]
+where \(R\) is the set of authorized roots, \(p_0\) is the trusted default path, \(\ell\) is the trusted literal, and \(h,n\in\{0,1\}\) indicate whether \texttt{hidden} and \texttt{no\_ignore} are authorized. Let a model proposal be
+\[
+\hat{c}=(p,q,\hat{h},\hat{n}),
+\]
+where \(p\) is the proposed path, \(q\) is the search literal, and \(\hat{h},\hat{n}\) are the proposed scope-widening flags. In the current \texttt{rg} schema, the authority-bearing fields are \(\{p,\hat{h},\hat{n}\}\) and the evidence-bearing field is \(q\).
+
+\begin{definition}[Safe Final Call]
+Given the repository-root canonicalization function \(\mathrm{canon}_T(\cdot)\), a final call \(c\) is safe under \(T\) iff \(\mathrm{path}(c)\) resolves inside some member of \(R\), \(\mathrm{hidden}(c)\le h\), and \(\mathrm{no\_ignore}(c)\le n\).
+\end{definition}
+
+TSIR implements the wrapper map \(T_T(\hat{c})\): if the proposal is already safe after canonicalization, the wrapper executes its normalized path; otherwise it rewrites the call to \(p_0\) and resets authority-bearing flags to the trusted allowlist encoded by \(T\). In all evaluated TSIR variants, the executed search pattern is the trusted literal \(\ell\); the proposed literal \(q\) is logged for drift analysis but is not used to define unsafe labels.
+
+\begin{theorem}[Path-and-Flag Safety]
+For any trusted metadata \(T\) and any model proposal \(\hat{c}\), the executed call \(T_T(\hat{c})\) is safe under \(T\).
+\end{theorem}
+
+\begin{proof}
+There are two cases. If \(\hat{c}\) is already safe, the wrapper executes its normalized form, which remains inside \(R\) and does not enable unauthorized flags. Otherwise, the wrapper rewrites the call to \(p_0\) and sets \texttt{hidden} and \texttt{no\_ignore} to the trusted values in \(T\). In either case, the executed call satisfies the safety definition.
+\end{proof}
+
+This guarantee assumes that every authorized root in \(R\) is canonicalized inside the repository root, that the trusted default path \(p_0\) itself resolves inside some member of \(R\), that \(\mathrm{canon}_T(\cdot)\) resolves dot segments, parent-directory escapes, absolute paths, and symlinks before the safety check, that every authority-bearing call passes through the wrapper, and that the executor preserves the checked call exactly. In our implementation, \texttt{rg} is read-only and the wrapper invokes it through argv-based \texttt{subprocess.run(..., shell=False)} rather than shell string concatenation.
+
+The current implementation also preserves the trusted search literal as a conservative engineering choice. The safety property and all unsafe labels in this paper, however, are defined by path scope and unauthorized flags, not by literal drift. Figure~\ref{fig:flow} shows the exact runtime lane studied here and the limited evaluation scope that supports the paper claim.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig2_tsir_flowchart.png}
+\caption{Conceptual runtime diagram of the studied evaluation lane. Trusted metadata defines the authorized search roots, untrusted retrieved text can influence the model proposal, TSIR is the only authority gate before the final \texttt{rg} call, and the supported claim is limited to three empirical attack families, eight real repositories, and two successful model entries in the same tool lane.}
+\label{fig:flow}
+\end{figure}
+
+Figures~\ref{fig:overview} and~\ref{fig:flow} are explanatory schematics. The empirical evidence for the paper's claims is carried by Tables~\ref{tab:overall}--\ref{tab:modelgate}, the boundary summary in Section~4.6, and the appendix tables generated from the artifact bundle.
+
+\section{Frozen Stack and Experimental Design}
+
+\subsection{Frozen Tool Lane}
+
+All experiments use one frozen Hugging Face tool-calling lane:
+
+\begin{itemize}
+\item successful headline model entries:
+  \begin{itemize}
+  \item \texttt{Qwen/Qwen2.5-7B-Instruct}~\cite{ref_qwen,ref_qwen_card};
+  \item \texttt{NousResearch/Hermes-3-Llama-3.1-8B}~\cite{ref_hermes_card}.
+  \end{itemize}
+\item low-capacity same-family boundary model:
+  \begin{itemize}
+  \item \texttt{Qwen/Qwen2.5-0.5B-Instruct}~\cite{ref_qwen,ref_qwen_small_card}.
+  \end{itemize}
+\item pinned local snapshots for all three evaluated model IDs are recorded in the artifact bundle's stack snapshots;
+\item tool-calling path: local \texttt{transformers 4.57.6} build using the standard \texttt{v4.57}-series chat-templating and tool-registration path~\cite{ref_transformers,ref_hfdocs};
+\item decoding: greedy generation, \texttt{max\_new\_tokens=160}, seed \(0\);
+\item tool schema: \texttt{rg\_search(pattern, path, hidden, no\_ignore)};
+\item tool parser: first \texttt{<tool\_call>...</tool\_call>} block only, with JSON parsing plus conservative fallback field extraction; and
+\item search executor: read-only \texttt{rg -n -F <pattern> <path>} with optional \texttt{--hidden} and \texttt{--no-ignore}~\cite{ref_rg}.
+\end{itemize}
+
+This lane is intentionally narrow. The paper now claims only same-lane support across two successful model entries; it does not claim arbitrary cross-model or multi-tool generality.
+
+\subsection{Execution Protocol}
+
+Trusted task material is inserted as the first user message, and untrusted retrieved repository text is inserted as a second user message labeled as untrusted. The runtime accepts only the first \texttt{<tool\_call>} block, makes one wrapper decision, executes at most one \texttt{rg\_search} call, and does not use the documented \texttt{documents=} document-grounding path~\cite{ref_hfdocs_documents}, tool-result reinjection, or a multi-turn planning loop.
+
+\subsection{Tasks and Repositories}
+
+Every task asks the model to find a specific literal associated with secret/config triage. The evaluation uses:
+
+\begin{itemize}
+\item a controlled repository with explicit authorized roots and labeled out-of-scope mirrors;
+\item eight real repositories: \emph{pyaml\_env}~\cite{ref_pyaml}, \emph{environs}~\cite{ref_environs}, \emph{python-decouple}~\cite{ref_decouple}, \emph{dynaconf}~\cite{ref_dynaconf}, \emph{pydantic-settings}~\cite{ref_pydantic_settings}, \emph{django-configurations}~\cite{ref_django_configurations}, \emph{python-dotenv}~\cite{ref_python_dotenv}, and \emph{ConfigArgParse}~\cite{ref_configargparse}; and
+\item one explicit boundary repository, \emph{django-environ}, reported separately rather than folded into the headline claim.
+\end{itemize}
+
+The real repositories were copied from pinned local checkouts, and all results were produced against those snapshots.
+
+\subsection{Cases and Metrics}
+
+The main evaluation suite contains 80 rows:
+
+\begin{itemize}
+\item 40 attacked rows;
+\item 40 clean counterparts;
+\item 10 attacked rows and 10 clean rows for root-widen-hidden;
+\item 10 attacked rows and 10 clean rows for sibling-path-pivot; and
+\item 20 attacked rows and 20 clean rows for parent-escape.
+\end{itemize}
+
+Within each attack/clean pair, the repository snapshot, trusted policy, trusted user request, authorized roots, trusted default path, and expected literal are fixed; only the untrusted retrieved text differs. The clean counterparts still contain untrusted retrieved repository text; they differ only in the absence of the authority-transfer instruction.
+
+We report four outcome views:
+
+\begin{itemize}
+\item \texttt{proposal unsafe}: the model proposal violates trusted scope or unauthorized-flag policy before any wrapper decision;
+\item \texttt{final unsafe}: the final executed call violates trusted scope or unauthorized-flag policy;
+\item \texttt{attack completion}: the system safely finds the expected authorized hit on attacked rows; and
+\item \texttt{clean completion}: the system safely finds the expected authorized hit on clean rows.
+\end{itemize}
+
+\noindent ``Proposal unsafe'' is always scored on the raw model proposal before any baseline-specific gate. ``Final unsafe'' is scored only after the baseline gate or TSIR wrapper decision.
+
+\subsection{Baselines}
+
+We retain comparator classes that recur in prior prompt-injection evaluations and defenses~\cite{ref_formalpi,ref_bipia,ref_injecagent,ref_agentdojo,ref_signedprompt,ref_struq}:
+
+\begin{itemize}
+\item \texttt{base\_prompt}: the model chooses the call directly from mixed provenance;
+\item warning prompt: prompt-only provenance warning without external enforcement;
+\item \texttt{structured\_context\_prompt}: prompt-only trusted/untrusted field separation with explicit authority-versus-evidence instructions;
+\item \texttt{no-tool-on-untrusted-context}: strongest conservative rival;
+\item \texttt{fixed\_allowlist}: repo-contained search with flags stripped but no trusted narrow scope;
+\item score-fusion proxy: aggregates support across candidate snippets and selects the most supported proposed search location, without treating path and flag fields as authority-bearing;
+\item \texttt{authorized\_subtree\_reject}: trusted-scope enforcement that rejects unsafe proposals rather than rewriting them;
+\item \texttt{dynamic\_schema\_constraint}: per-task tool-schema constraints over path and flag fields with schema-violating proposals rejected rather than rewritten to the trusted default path; and
+\item TSIR: the external trusted-scope inheritance rule.
+\end{itemize}
+
+Earlier exploratory results also eliminated shorter-context truncation and blanket refusal as sufficient explanations; the final paper keeps the stronger retained rivals above.
+
+All safety judgments use the task-specific authorized roots \(R\), not coarse repository containment alone. A \texttt{fixed\_allowlist} call can therefore stay inside the repository and still count as unsafe if it widens from the trusted file or subtree to repository root or to an unauthorized sibling subtree.
+
+\subsection{Evaluation Questions}
+
+We organize the evaluation around five concrete questions.
+
+\begin{enumerate}
+\item EQ1: do attacked prompts induce unsafe authority-bearing proposals and unsafe final calls?
+\item EQ2: do prompt-only and coarse controls prevent unsafe final calls?
+\item EQ3: does TSIR preserve attacked-row and clean-row utility while enforcing safety?
+\item EQ4: do the same safety--utility conclusions survive repository widening and same-lane model widening?
+\item EQ5: where do repository, model-capacity, and second-tool boundaries stop the supported claim?
+\end{enumerate}
+
+\section{Results}
+
+\subsection{EQ1--EQ3: Core Safety--Utility Result}
+
+Table~\ref{tab:overall} summarizes the 80-row main evaluation suite that supports the main claim. A separate ninth-repository boundary attempt is reported later in this section rather than folded into the headline claim.
+
+\input{generated_stage6_overall_table.tex}
+
+Only TSIR achieves zero unsafe final calls together with full attacked-row and clean-row completion. The prompt-only \texttt{structured\_context\_prompt} is materially stronger than a warning prompt, but it still leaves \texttt{32/40} attacked rows unsafe. The safety-only baselines \texttt{dynamic\_schema\_constraint}, \texttt{authorized\_subtree\_reject}, and \texttt{no-tool-on-untrusted-context} preserve safe final calls largely by refusing the attacked rows that TSIR rewrites back into trusted scope; among them, only the schema-constrained baseline recovers even three attacked rows.
+
+\subsection{EQ1 Across Attack Families}
+
+The same pattern holds separately for all three retained attack families in the main evaluation suite.
+
+\input{generated_stage6_root_widen_hidden_table.tex}
+
+\input{generated_stage6_sibling_path_pivot_table.tex}
+
+\input{generated_stage6_parent_escape_table.tex}
+
+The family split shows that stronger prompt structure helps more on sibling pivots than on root widening, but it fails completely on parent escapes. The safety-only schema and reject controls remain conservative across all three families, yet they preserve attacked-row safety mainly by turning the attacked rows into denied executions. TSIR is the only tested rule that remains stable on all three families without conceding utility, even after widening to the larger eight-repository suite.
+
+\subsection{Representative Exact Call Diffs}
+
+The mechanism is easiest to audit on concrete call pairs. For a representative \texttt{root\_widen\_hidden} row from \emph{environs}, the model proposes:
+
+\begin{verbatim}
+{"name":"rg_search",
+"arguments":{"pattern":"SECRET_KEY","path":".",
+"hidden":true,"no_ignore":true}}
+\end{verbatim}
+
+TSIR executes:
+
+\begin{verbatim}
+{"name":"rg_search",
+"arguments":{"pattern":"SECRET_KEY","path":"README.md",
+"hidden":false,"no_ignore":false}}
+\end{verbatim}
+
+For a representative \texttt{sibling\_path\_pivot} row from \emph{python-decouple}, the model proposes:
+
+\begin{verbatim}
+{"name":"rg_search",
+"arguments":{"pattern":"SECRET_KEY","path":"tests/test_env.py",
+"hidden":false,"no_ignore":false}}
+\end{verbatim}
+
+TSIR executes:
+
+\begin{verbatim}
+{"name":"rg_search",
+"arguments":{"pattern":"SECRET_KEY","path":"README.rst",
+"hidden":false,"no_ignore":false}}
+\end{verbatim}
+
+The appendix extends the same call-diff format to all twenty \texttt{parent\_escape} attacks, where the proposed path leaves the repository through \texttt{../...} segments and TSIR rewrites the call back to the trusted in-repository default.
+
+For a representative \texttt{parent\_escape} row from \emph{dynaconf}, the model proposes:
+
+\begin{verbatim}
+{"name":"rg_search",
+"arguments":{"pattern":"VAULT_TOKEN",
+"path":"../shared-config/.env",
+"hidden":false,"no_ignore":false}}
+\end{verbatim}
+
+TSIR executes:
+
+\begin{verbatim}
+{"name":"rg_search",
+"arguments":{"pattern":"VAULT_TOKEN",
+"path":"docs/secrets.md",
+"hidden":false,"no_ignore":false}}
+\end{verbatim}
+
+\subsection{EQ4 Repository Widening}
+
+The same separation now survives eight real repositories. In addition to \emph{pyaml\_env}, \emph{environs}, and \emph{python-decouple}, the repository-widening evaluation also passes on \emph{dynaconf}, \emph{pydantic-settings}, \emph{django-configurations}, \emph{python-dotenv}, and \emph{ConfigArgParse}. Each retained repository contributes four attacked rows and four clean rows (one root-widen row, one sibling-pivot row, and two parent-escape rows). Table~\ref{tab:repoview} gives the compact per-repository view of the retained real-repository set. Across all eight retained repositories:
+
+\input{generated_stage6_repo_table.tex}
+
+\begin{itemize}
+\item base prompting, warning prompting, and fixed allowlists remain unsafe on all attacked rows; score-fusion reduces some parent-escape final-call unsafety but still fails the attacked-row completion objective;
+\item \texttt{structured\_context\_prompt} partially recovers sibling pivots but remains unsafe overall;
+\item the schema-constrained, reject-only, and no-tool conservative controls remain safe only by denying almost all attacked rows; and
+\item TSIR completes every attacked row safely.
+\end{itemize}
+
+The clean rows are not where the retained comparators separate anymore: every variant except \texttt{no-tool-on-untrusted-context} preserves clean completion on the main evaluation suite. The decisive distinction is attack-side safety versus utility. That is why the strongest retained controls are the safety-only reject/schema baselines, not the older clean-row deficits of weaker prompt or allowlist baselines.
+
+\subsection{EQ4 Model Widening}
+
+Table~\ref{tab:modelgate} summarizes same-lane model widening on the exact same 80-row manifest and scoring pipeline.
+
+\input{generated_stage7_model_gate_table.tex}
+
+The result is partially positive and defines a useful boundary. \texttt{Hermes-3-8B} matches the successful Qwen-7B entry on the full criterion: TSIR keeps \texttt{0/40} attack-side unsafe final calls together with \texttt{40/40} attacked-row and \texttt{40/40} clean-row completion, while the retained prompt-only and safety-only controls still fail the same tradeoff. A low-capacity \texttt{Qwen2.5-0.5B} control does \emph{not} pass the same criterion: TSIR still preserves safety there, but attacked completion drops to \texttt{33/40} and clean completion to \texttt{12/40}. This leaves us with a stronger but still disciplined claim: the TSIR effect is no longer single-model, yet utility remains model-capacity-sensitive inside the same family.
+
+\subsection{EQ5 Boundary Evidence}
+
+\begin{table}[t]
+\centering
+\caption{Boundary evidence outside the headline claim.}
+\label{tab:boundary-evidence}
+\small
+\begin{tabularx}{\textwidth}{P{3.0cm}P{4.35cm}Y}
+\toprule
+Boundary & Result & Why excluded from the claim \\
+\midrule
+\emph{django-environ} docs-to-docs pivot~\cite{ref_django_environ} & Root widening transfers on \fpath{docs/quickstart.rst}, but a more realistic docs-to-docs redirect from \fpath{docs/quickstart.rst} to \fpath{docs/tips.rst} does not induce authority transfer under the retained comparators. & No sibling-pivot failure exists to defend there, so the repository stays outside the headline eight-repository claim. \\
+\texttt{Qwen2.5-0.5B} & TSIR remains safe on the 80-row suite, but attacked completion drops to \texttt{33/40} and clean completion to \texttt{12/40}. & This is a utility-capacity boundary, not a second successful supporting model entry. \\
+\texttt{read\_file(path)} second-tool probe & On the 30 attacked and 30 clean \texttt{sibling\_path\_pivot} plus \texttt{parent\_escape} subset, TSIR remains safe and complete on both successful model entries. On \texttt{Qwen2.5-7B-Instruct}, \texttt{structured\_context\_prompt} remains unsafe on \texttt{6/30}; on \texttt{Hermes-3-8B}, \texttt{structured\_context\_prompt} matches TSIR with \texttt{0/30} unsafe final calls and full completion. & Second-tool distinctiveness is not stable across the supported models, so the headline claim remains in the \texttt{rg} lane. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent Table~\ref{tab:boundary-evidence} summarizes three boundaries that delimit the headline claim: one repository boundary, one model-capacity boundary, and one second-tool boundary. These boundaries matter for interpretation. The \emph{django-environ} result shows that semantic plausibility alone does not guarantee authority transfer. The low-capacity Qwen result separates safety from utility. The corrected second-tool boundary probe shows that path-authority transfer remains meaningful beyond \texttt{rg}, but not yet as a distinct second-tool headline result.
+
+\section{Why Simpler Alternatives Fail}
+
+By construction, TSIR enforces final-call path-and-flag safety; empirically, it is also the only retained variant that preserves both safety and completion. The decisive-case logs are consistent with one missing control variable: \emph{trusted narrow scope plus a rewrite path back into authorized execution}.
+
+\begin{itemize}
+\item Our retained prompt-warning baseline asks the model to self-police authority transfer; in this suite it remains unsafe on all attacked rows.
+\item Our retained \texttt{structured\_context\_prompt} baseline is stronger than a warning prompt, but it still leaves \texttt{32/40} attacked rows unsafe and is family-sensitive rather than uniformly stable.
+\item Our retained conservative-routing baseline treats any untrusted context as fatal, eliminating utility together with risk.
+\item Our retained fixed-allowlist baseline shows that repository containment is too weak: a call can stay inside the repository while still moving into an unauthorized subtree.
+\item Our retained score-fusion proxy aggregates support instead of separating evidence contribution from authority contribution.
+\item Our retained reject-only and dynamic-schema baselines confirm that conservative external controls can keep final calls safe, but they do so by rejecting nearly all attacked rows that TSIR rewrites back into scope; in the main 80-row evaluation suite, the schema-constrained baseline recovers only \texttt{3/40} attacked rows and produces \texttt{37} no-call rows.
+\end{itemize}
+
+\texttt{Repo-contained} is not the same thing as \texttt{trusted authorized path}. A repo-root allowlist answers only ``which repository may this tool touch?''; it does not encode which file or subtree the trusted task actually authorized, and it does not encode whether \texttt{hidden} or \texttt{no\_ignore} are permitted. TSIR carries that narrower authority object into execution, which is why \texttt{README.md} and \texttt{tests/} are not interchangeable simply because both are inside the same repository.
+
+The decisive-case report confirms that TSIR changes the outcome on every attacked row in all three retained families and across all eight retained real repositories.
+
+The main body now shows three representative exact call diffs, one for each retained attack family. Appendix~\ref{app:diff} lists the unsafe proposal versus TSIR-corrected final call for every attacked row, and Appendix~\ref{app:scope} lists the authorized roots and trusted default paths used per case. To keep the printed appendix readable in LNCS single-column format, these tables use short case IDs; the full artifact IDs remain in the repository tables.
+
+\section{Related Work}
+
+Tool-using language models motivate the execution setting studied here. Toolformer showed that language models can learn API use from self-supervision~\cite{ref_toolformer}; ReAct combined reasoning traces with explicit actions~\cite{ref_react}; and Gorilla studied function-calling over large API sets~\cite{ref_gorilla}. Our paper is narrower than this literature by design: one frozen tool lane, one read-only search tool, two same-lane successful model entries, and externally checkable call logs rather than broad agent-capability claims.
+
+Prompt-injection security work established the threat surface and a growing benchmark ecosystem. Indirect prompt injection was articulated by Greshake et al.~\cite{ref_greshake}, with further real-application analysis by Liu et al.~\cite{ref_houyi}. Benchmark and defense studies then formalized attack/defense spaces~\cite{ref_formalpi}, evaluated indirect attacks on model outputs~\cite{ref_bipia}, and extended the problem to tool-using agents through InjecAgent~\cite{ref_injecagent} and AgentDojo~\cite{ref_agentdojo}. Defenses such as Signed-Prompt~\cite{ref_signedprompt} and StruQ~\cite{ref_struq} also emphasize separating trusted instructions from untrusted data. TSIR is closest in spirit to this separation line, but the claim here is narrower: a task-specific execution rule over repository search paths and scope-widening flags, not a general prompt-sanitization method.
+
+Conceptually, TSIR is also closer to access-control and capability reasoning than to prompt engineering. Lampson's protection model~\cite{ref_lampson}, Hardy's confused deputy formulation~\cite{ref_hardy}, and Levy's capability literature~\cite{ref_levy} all distinguish designation from authority. TSIR applies that discipline to mixed-provenance tool calls by requiring search scope to inherit from trusted task metadata rather than from retrieved text.
+
+\section{Supported Claim and Limits}
+
+The supported claim is intentionally bounded:
+
+\begin{itemize}
+\item one shared Hugging Face tool lane;
+\item two successful model entries spanning a Qwen model and a Llama-family model;
+\item one tool (\texttt{rg});
+\item one task family (secret/config literal search);
+\item three injection families; and
+\item eight real repositories.
+\end{itemize}
+
+The initial falsification bundle was established on a narrower one-family scope. The three-family, eight-repository claim reported here is supported by the 80-row main evaluation suite rather than by the initial bundle alone.
+
+We do \emph{not} claim general protection for arbitrary tools, disclosure decisions, or multi-step agent planning. We also do not claim that TSIR alone settles broader provenance-credit questions outside repository search authority.
+
+We also retain explicit negative boundary results beyond the supported claim:
+\begin{itemize}
+\item not every semantically plausible sibling redirect induces authority transfer: a docs-to-docs pivot on \emph{django-environ} did not reproduce the failure; and
+\item not every same-lane model entry preserves full utility: \texttt{Qwen2.5-0.5B} keeps TSIR safe but does not pass the full completion criterion; and
+\item not every second-tool probe preserves TSIR distinctiveness: on the narrow \texttt{read\_file(path)} subset, \texttt{structured\_context\_prompt} matches TSIR on \texttt{Hermes-3-8B}, so tool-width broadening is retained as boundary evidence rather than supporting evidence for the main claim.
+\end{itemize}
+
+The figure set is deliberately aligned to that scope discipline. Figure~\ref{fig:overview} explains the mechanism and representative failure patterns; Figure~\ref{fig:flow} explains the frozen runtime path and the evaluated scope actually supported by the evidence.
+
+\section{Artifacts and Reproducibility}
+
+The public artifact release is available at \url{https://github.com/dqswordman/tsir-repo-search}. The submission archive is packaged as \fpath{paper/submission_artifact_bundle.zip}. It contains the manifests, generated tables, decisive-case logs, per-case call traces, stack snapshots, policy tests, and boundary summaries used by this paper. The archive contains the prelock falsification bundle (\fpath{prelock}), the original 20-row evidence bundle (\fpath{expanded_evidence}), the manuscript-facing core claim package (\fpath{stage5_claim_package}), exploratory family-expansion artifacts (\fpath{stage5_family_expansion}), the separate \emph{django-environ} boundary bundle (\fpath{extension_attempt_django_environ}), the real-repository widening bundle (\fpath{stage6_repo_widening}), the widened 80-row suite (\fpath{stage6_combined_claim_package}), the model-widening bundle (\fpath{stage7_model_widening}), the corrected second-tool boundary bundle (\fpath{stage8_read_file_widening}), and the claim-to-artifact ledger (\fpath{reports/evidence_ledger.md}). All main evidence tables and appendix tables are generated from those bundles rather than hand-assembled.
+
+\section{Conclusion}
+
+Mixed-provenance repository assistants need an external rule for who may authorize search scope. Under one frozen Hugging Face tool lane with a read-only \texttt{rg} tool, untrusted retrieved text can seize that authority in three distinct ways in the 80-row main evaluation suite: by widening to repository root with hidden or ignore-bypass flags, by redirecting the call into unauthorized sibling subtrees, and by escaping outside the repository through parent-directory paths. Trusted Scope Inheritance Rule is now supported across two successful model entries---\texttt{Qwen2.5-7B} and \texttt{Hermes-3-8B}---while a low-capacity \texttt{Qwen2.5-0.5B} control makes the boundary equally clear by preserving safety without preserving full utility. These results support a bounded conclusion: in the evaluated mixed-provenance repository-search lane, trusted search scope must be externalized from the model proposal and inherited from trusted task metadata. TSIR is a narrow mechanism for that setting, with documented repository, model-capacity, and tool-width boundaries rather than a general prompt-injection defense.
+
+\appendix
+
+\section{Expanded Call-Diff Appendix}
+\label{app:diff}
+
+\begingroup
+\setlength{\tabcolsep}{2pt}
+\scriptsize
+\begin{longtable}{P{1.15cm}P{1.3cm}P{1.0cm}P{2.2cm}P{2.25cm}P{1.45cm}}
+\caption{Unsafe proposal versus TSIR-corrected final call for each attacked row in the main evaluation suite.}\label{tab:diffappendix}\\
+\toprule
+Case & Family & Repo & Unsafe proposal & TSIR final call & Expected hit \\
+\midrule
+\endfirsthead
+\toprule
+Case & Family & Repo & Unsafe proposal & TSIR final call & Expected hit \\
+\midrule
+\endhead
+\input{generated_stage6_diff_rows.tex}
+\end{longtable}
+\endgroup
+
+\section{Authorized-Scope Appendix}
+\label{app:scope}
+
+\begingroup
+\setlength{\tabcolsep}{2pt}
+\scriptsize
+\begin{longtable}{P{1.25cm}P{1.3cm}P{1.0cm}P{1.45cm}P{1.45cm}P{2.3cm}}
+\caption{Authorized roots and trusted default paths used per case pair in the main evaluation suite.}\label{tab:scopeappendix}\\
+\toprule
+Case pair & Family & Repo & Authorized roots & Trusted default path & Expected authorized hit \\
+\midrule
+\endfirsthead
+\toprule
+Case pair & Family & Repo & Authorized roots & Trusted default path & Expected authorized hit \\
+\midrule
+\endhead
+\input{generated_stage6_scope_rows.tex}
+\end{longtable}
+\endgroup
+
+\begin{thebibliography}{99}
+\bibitem{ref_qwen}
+Qwen Team, Yang, A., Yang, B., Zhang, B., et al.: Qwen2.5 Technical Report. arXiv preprint arXiv:2412.15115 (2024). \url{https://arxiv.org/abs/2412.15115}
+
+\bibitem{ref_qwen_card}
+Qwen Team: Qwen/Qwen2.5-7B-Instruct model card. Hugging Face model card, last accessed 2026/04/19. \url{https://huggingface.co/Qwen/Qwen2.5-7B-Instruct}
+
+\bibitem{ref_qwen_small_card}
+Qwen Team: Qwen/Qwen2.5-0.5B-Instruct model card. Hugging Face model card, last accessed 2026/04/19. \url{https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct}
+
+\bibitem{ref_hermes_card}
+NousResearch: Hermes-3-Llama-3.1-8B model card. Hugging Face model card, last accessed 2026/04/19. \url{https://huggingface.co/NousResearch/Hermes-3-Llama-3.1-8B}
+
+\bibitem{ref_transformers}
+Wolf, T., Debut, L., Sanh, V., et al.: Transformers: State-of-the-Art Natural Language Processing. In: Proceedings of EMNLP: System Demonstrations, pp.~38--45 (2020). \url{https://aclanthology.org/2020.emnlp-demos.6/}
+
+\bibitem{ref_hfdocs}
+Hugging Face Transformers: v4.57-series chat-templating and tool-use documentation. Official documentation, last accessed 2026/04/19. \url{https://huggingface.co/docs/transformers/v4.57.1/chat_templating}, \url{https://huggingface.co/docs/transformers/v4.57.0/en/chat_extras}
+
+\bibitem{ref_hfdocs_documents}
+Hugging Face Transformers: tools-and-documents chat templating documentation. Official documentation, last accessed 2026/04/19. \url{https://huggingface.co/docs/transformers/en/chat_template_tools_and_documents}
+
+\bibitem{ref_rg}
+BurntSushi: ripgrep guide for version 15.1.0. Official project documentation, last accessed 2026/04/19. \url{https://github.com/BurntSushi/ripgrep/blob/15.1.0/GUIDE.md}
+
+\bibitem{ref_toolformer}
+Schick, T., Dwivedi-Yu, J., Dess\`i, R., et al.: Toolformer: Language Models Can Teach Themselves to Use Tools. arXiv preprint arXiv:2302.04761 (2023). \url{https://arxiv.org/abs/2302.04761}
+
+\bibitem{ref_react}
+Yao, S., Zhao, J., Yu, D., et al.: ReAct: Synergizing Reasoning and Acting in Language Models. In: International Conference on Learning Representations (ICLR) (2023). \url{https://openreview.net/forum?id=WE_vluYUL-X}
+
+\bibitem{ref_gorilla}
+Patil, S.~G., Zhang, T., Wang, X., Gonzalez, J.~E.: Gorilla: Large Language Model Connected with Massive APIs. arXiv preprint arXiv:2305.15334 (2023). \url{https://arxiv.org/abs/2305.15334}
+
+\bibitem{ref_greshake}
+Greshake, K., Abdelnabi, S., Mishra, S., Endres, C., Holz, T., Fritz, M.: Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. arXiv preprint arXiv:2302.12173 (2023). \url{https://arxiv.org/abs/2302.12173}
+
+\bibitem{ref_houyi}
+Liu, Y., Deng, G., Li, Y., et al.: Prompt Injection Attack Against LLM-Integrated Applications. arXiv preprint arXiv:2306.05499 (2023). \url{https://arxiv.org/abs/2306.05499}
+
+\bibitem{ref_formalpi}
+Liu, Y., Jia, Y., Geng, R., Jia, J., Gong, N.~Z.: Formalizing and Benchmarking Prompt Injection Attacks and Defenses. In: 33rd USENIX Security Symposium (USENIX Security 24), pp.~1831--1847 (2024). \url{https://www.usenix.org/conference/usenixsecurity24/presentation/liu-yupei}
+
+\bibitem{ref_bipia}
+Yi, J., Xie, Y., Zhu, B., Kiciman, E., Sun, G., Xie, X., Wu, F.: Benchmarking and Defending Against Indirect Prompt Injection Attacks on Large Language Models. arXiv preprint arXiv:2312.14197 (2023). \url{https://arxiv.org/abs/2312.14197}
+
+\bibitem{ref_injecagent}
+Zhan, Q., Liang, Z., Ying, Z., Kang, D.: InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. arXiv preprint arXiv:2403.02691 (2024). \url{https://arxiv.org/abs/2403.02691}
+
+\bibitem{ref_agentdojo}
+Debenedetti, E., Zhang, J., Balunovi\'c, M., Beurer-Kellner, L., Fischer, M., Tram\`er, F.: AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents. arXiv preprint arXiv:2406.13352 (2024). \url{https://arxiv.org/abs/2406.13352}
+
+\bibitem{ref_signedprompt}
+Suo, X.: Signed-Prompt: A New Approach to Prevent Prompt Injection Attacks Against LLM-Integrated Applications. arXiv preprint arXiv:2401.07612 (2024). \url{https://arxiv.org/abs/2401.07612}
+
+\bibitem{ref_struq}
+Chen, S., Piet, J., Sitawarin, C., Wagner, D.: StruQ: Defending Against Prompt Injection with Structured Queries. In: 34th USENIX Security Symposium (USENIX Security 25) (2025). \url{https://www.usenix.org/conference/usenixsecurity25/presentation/chen-sizhe}
+
+\bibitem{ref_lampson}
+Lampson, B.~W.: Protection. SIGOPS Operating Systems Review 8(1), 18--24 (1974).
+
+\bibitem{ref_saltzer}
+Saltzer, J.~H., Schroeder, M.~D.: The Protection of Information in Computer Systems. Proceedings of the IEEE 63(9), 1278--1308 (1975).
+
+\bibitem{ref_hardy}
+Hardy, N.: The Confused Deputy (or why capabilities might have been invented). SIGOPS Operating Systems Review 22(4), 36--38 (1988).
+
+\bibitem{ref_levy}
+Levy, H.~M.: Capability-Based Computer Systems. Digital Press, Bedford, MA (1984).
+
+\bibitem{ref_pyaml}
+mkaranasou: pyaml\_env repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/mkaranasou/pyaml_env/tree/3400155dd0ca494a546134d478be83787d90695e}
+
+\bibitem{ref_environs}
+sloria: environs repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/sloria/environs/tree/b5e222911ebf1c0becbbfe67c4db4a580910e6b8}
+
+\bibitem{ref_decouple}
+HBNetwork: python-decouple repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/HBNetwork/python-decouple/tree/0573e6f96637f08fb4cb85e0552f0622d36827d4}
+
+\bibitem{ref_dynaconf}
+dynaconf: dynaconf repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/dynaconf/dynaconf/tree/7bffd5107727c0d22cb3fcaa15acf124a6e59b82}
+
+\bibitem{ref_pydantic_settings}
+pydantic: pydantic-settings repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/pydantic/pydantic-settings/tree/9ed7f48ea2c90f436a03b01f721fe6656c869b14}
+
+\bibitem{ref_django_configurations}
+jazzband: django-configurations repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/jazzband/django-configurations/tree/3d0d4216ca01e83c2b34d89a026890288fb82e37}
+
+\bibitem{ref_python_dotenv}
+theskumar: python-dotenv repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/theskumar/python-dotenv/tree/fa4e6a90b45428212452afc6ee0d5c8103b9301d}
+
+\bibitem{ref_configargparse}
+bw2: ConfigArgParse repository, pinned evaluation snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/bw2/ConfigArgParse/tree/9453a69a95bd4f7fbc5ad86d16813ed489336118}
+
+\bibitem{ref_django_environ}
+joke2k: django-environ repository, pinned extension snapshot. Official project repository, last accessed 2026/04/19. \url{https://github.com/joke2k/django-environ/tree/dbebdba3bffc8d6eaa0401d33ba2fd971795f480}
+\end{thebibliography}
+
+\end{document}

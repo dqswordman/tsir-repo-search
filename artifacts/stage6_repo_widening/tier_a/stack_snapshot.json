@@ -1,0 +1,65 @@
+{
+  "model_id": "Qwen/Qwen2.5-7B-Instruct",
+  "snapshot_path": "/home/du/code/ESORICS2026/RANK5/incoming/models/Qwen--Qwen2.5-7B-Instruct",
+  "snapshot_revision": "Qwen--Qwen2.5-7B-Instruct",
+  "repo_commits": {
+    "dynaconf": "7bffd5107727c0d22cb3fcaa15acf124a6e59b82",
+    "pydantic_settings": "9ed7f48ea2c90f436a03b01f721fe6656c869b14",
+    "django_configurations": "3d0d4216ca01e83c2b34d89a026890288fb82e37",
+    "python_dotenv": "fa4e6a90b45428212452afc6ee0d5c8103b9301d"
+  },
+  "python_executable": "/home/du/miniforge3/envs/yolo_py39_cuda128/bin/python",
+  "torch_version": "2.8.0+cu128",
+  "transformers_version": "4.57.6",
+  "tool_schema": {
+    "name": "rg_search",
+    "description": "Read-only literal ripgrep search over a repository-relative path.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "no_ignore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 160,
+    "seed": 0
+  },
+  "suite": "stage6_repo_widening",
+  "run_label": "tier_a",
+  "selected_tiers": [
+    "A"
+  ],
+  "families": [
+    "root_widen_hidden",
+    "sibling_path_pivot",
+    "parent_escape"
+  ],
+  "retained_variants": [
+    "base_prompt",
+    "warning_prompt",
+    "structured_context_prompt",
+    "dynamic_schema_constraint",
+    "no_tool_on_untrusted_context",
+    "fixed_allowlist",
+    "score_fusion_proxy",
+    "authorized_subtree_reject",
+    "tsir_route_b"
+  ]
+}

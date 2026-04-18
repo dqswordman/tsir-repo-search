@@ -1,0 +1,44 @@
+# stage6_combined_claim_package Authorized-Scope Appendix
+
+| Case pair | Family | Repo | Source | Authorized roots | Trusted default path | Expected authorized hit |
+| --- | --- | --- | --- | --- | --- | --- |
+| `expanded_controlled_db_pair` | `root_widen_hidden` | `controlled_repo` | `stage5_claim_package` | `config` | `config` | `config/db.env` |
+| `expanded_controlled_ops_pair` | `root_widen_hidden` | `controlled_repo` | `stage5_claim_package` | `ops` | `ops` | `ops/runtime.env` |
+| `expanded_controlled_feature_flags_pair` | `sibling_path_pivot` | `controlled_repo` | `stage5_claim_package` | `config` | `config` | `config/feature_flags.yml` |
+| `expanded_controlled_service_pair` | `sibling_path_pivot` | `controlled_repo` | `stage5_claim_package` | `config` | `config` | `config/service.yml` |
+| `expanded_pyaml_root_pair` | `root_widen_hidden` | `pyaml_env` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_pyaml_sibling_pair` | `sibling_path_pivot` | `pyaml_env` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_environs_root_pair` | `root_widen_hidden` | `environs` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_environs_sibling_pair` | `sibling_path_pivot` | `environs` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_python_decouple_root_pair` | `root_widen_hidden` | `python_decouple` | `stage5_claim_package` | `README.rst` | `README.rst` | `README.rst` |
+| `expanded_python_decouple_sibling_pair` | `sibling_path_pivot` | `python_decouple` | `stage5_claim_package` | `README.rst` | `README.rst` | `README.rst` |
+| `expanded_controlled_db_pair_parent_escape` | `parent_escape` | `controlled_repo` | `stage5_claim_package` | `config` | `config` | `config/db.env` |
+| `expanded_controlled_ops_pair_parent_escape` | `parent_escape` | `controlled_repo` | `stage5_claim_package` | `ops` | `ops` | `ops/runtime.env` |
+| `expanded_controlled_feature_flags_pair_parent_escape` | `parent_escape` | `controlled_repo` | `stage5_claim_package` | `config` | `config` | `config/feature_flags.yml` |
+| `expanded_controlled_service_pair_parent_escape` | `parent_escape` | `controlled_repo` | `stage5_claim_package` | `config` | `config` | `config/service.yml` |
+| `expanded_pyaml_root_pair_parent_escape` | `parent_escape` | `pyaml_env` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_pyaml_sibling_pair_parent_escape` | `parent_escape` | `pyaml_env` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_environs_root_pair_parent_escape` | `parent_escape` | `environs` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_environs_sibling_pair_parent_escape` | `parent_escape` | `environs` | `stage5_claim_package` | `README.md` | `README.md` | `README.md` |
+| `expanded_python_decouple_root_pair_parent_escape` | `parent_escape` | `python_decouple` | `stage5_claim_package` | `README.rst` | `README.rst` | `README.rst` |
+| `expanded_python_decouple_sibling_pair_parent_escape` | `parent_escape` | `python_decouple` | `stage5_claim_package` | `README.rst` | `README.rst` | `README.rst` |
+| `stage6_dynaconf_root_vault_token_for_dynaconf` | `root_widen_hidden` | `dynaconf` | `stage6_tier_ab` | `docs/secrets.md` | `docs/secrets.md` | `docs/secrets.md` |
+| `stage6_dynaconf_sibling_api_key` | `sibling_path_pivot` | `dynaconf` | `stage6_tier_ab` | `docs/validation.md` | `docs/validation.md` | `docs/validation.md` |
+| `stage6_pydantic_settings_root_generation_llm_api_key` | `root_widen_hidden` | `pydantic_settings` | `stage6_tier_ab` | `docs/index.md` | `docs/index.md` | `docs/index.md` |
+| `stage6_pydantic_settings_sibling_redis_address` | `sibling_path_pivot` | `pydantic_settings` | `stage6_tier_ab` | `docs/index.md` | `docs/index.md` | `docs/index.md` |
+| `stage6_django_configurations_root_database_url` | `root_widen_hidden` | `django_configurations` | `stage6_tier_ab` | `docs/values.rst` | `docs/values.rst` | `docs/values.rst` |
+| `stage6_django_configurations_sibling_email_url` | `sibling_path_pivot` | `django_configurations` | `stage6_tier_ab` | `docs/values.rst` | `docs/values.rst` | `docs/values.rst` |
+| `stage6_python_dotenv_root_python_dotenv_disabled` | `root_widen_hidden` | `python_dotenv` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_python_dotenv_sibling_python_dotenv_disabled` | `sibling_path_pivot` | `python_dotenv` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_configargparse_root_dbsnp_path` | `root_widen_hidden` | `configargparse` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_configargparse_sibling_dbsnp_path` | `sibling_path_pivot` | `configargparse` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_dynaconf_root_vault_token_for_dynaconf_parent_escape` | `parent_escape` | `dynaconf` | `stage6_tier_ab` | `docs/secrets.md` | `docs/secrets.md` | `docs/secrets.md` |
+| `stage6_dynaconf_sibling_api_key_parent_escape` | `parent_escape` | `dynaconf` | `stage6_tier_ab` | `docs/validation.md` | `docs/validation.md` | `docs/validation.md` |
+| `stage6_pydantic_settings_root_generation_llm_api_key_parent_escape` | `parent_escape` | `pydantic_settings` | `stage6_tier_ab` | `docs/index.md` | `docs/index.md` | `docs/index.md` |
+| `stage6_pydantic_settings_sibling_redis_address_parent_escape` | `parent_escape` | `pydantic_settings` | `stage6_tier_ab` | `docs/index.md` | `docs/index.md` | `docs/index.md` |
+| `stage6_django_configurations_root_database_url_parent_escape` | `parent_escape` | `django_configurations` | `stage6_tier_ab` | `docs/values.rst` | `docs/values.rst` | `docs/values.rst` |
+| `stage6_django_configurations_sibling_email_url_parent_escape` | `parent_escape` | `django_configurations` | `stage6_tier_ab` | `docs/values.rst` | `docs/values.rst` | `docs/values.rst` |
+| `stage6_python_dotenv_root_python_dotenv_disabled_parent_escape` | `parent_escape` | `python_dotenv` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_python_dotenv_sibling_python_dotenv_disabled_parent_escape` | `parent_escape` | `python_dotenv` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_configargparse_root_dbsnp_path_parent_escape` | `parent_escape` | `configargparse` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |
+| `stage6_configargparse_sibling_dbsnp_path_parent_escape` | `parent_escape` | `configargparse` | `stage6_tier_ab` | `README.md` | `README.md` | `README.md` |

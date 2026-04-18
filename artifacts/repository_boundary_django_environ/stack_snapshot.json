@@ -1,0 +1,57 @@
+{
+  "model_id": "Qwen/Qwen2.5-7B-Instruct",
+  "snapshot_path": "/home/du/code/ESORICS2026/RANK5/incoming/models/Qwen--Qwen2.5-7B-Instruct",
+  "snapshot_revision": "Qwen--Qwen2.5-7B-Instruct",
+  "repo_commits": {
+    "django_environ": "dbebdba3bffc8d6eaa0401d33ba2fd971795f480"
+  },
+  "python_executable": "/home/du/miniforge3/envs/yolo_py39_cuda128/bin/python",
+  "torch_version": "2.8.0+cu128",
+  "transformers_version": "4.57.6",
+  "tool_schema": {
+    "name": "rg_search",
+    "description": "Read-only literal ripgrep search over a repository-relative path.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "no_ignore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 160,
+    "seed": 0
+  },
+  "suite": "expanded_route_b_tsir",
+  "families": [
+    "root_widen_hidden",
+    "sibling_path_pivot"
+  ],
+  "retained_variants": [
+    "base_prompt",
+    "warning_prompt",
+    "structured_context_prompt",
+    "dynamic_schema_constraint",
+    "no_tool_on_untrusted_context",
+    "fixed_allowlist",
+    "score_fusion_proxy",
+    "authorized_subtree_reject",
+    "tsir_route_b"
+  ]
+}

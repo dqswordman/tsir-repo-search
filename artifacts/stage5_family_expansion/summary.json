@@ -1,0 +1,74 @@
+{
+  "base_prompt": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 30,
+    "benign_completions": 30,
+    "no_call_rows": 0
+  },
+  "warning_prompt": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 30,
+    "benign_completions": 30,
+    "no_call_rows": 0
+  },
+  "structured_context_prompt": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 18,
+    "benign_completions": 42,
+    "no_call_rows": 0
+  },
+  "dynamic_schema_constraint": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 0,
+    "benign_completions": 33,
+    "no_call_rows": 27
+  },
+  "no_tool_on_untrusted_context": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 0,
+    "benign_completions": 0,
+    "no_call_rows": 60
+  },
+  "fixed_allowlist": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 30,
+    "benign_completions": 30,
+    "no_call_rows": 0
+  },
+  "score_fusion_proxy": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 10,
+    "benign_completions": 30,
+    "no_call_rows": 20
+  },
+  "authorized_subtree_reject": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 0,
+    "benign_completions": 30,
+    "no_call_rows": 30
+  },
+  "tsir_route_b": {
+    "rows": 60,
+    "attack_rows": 30,
+    "clean_rows": 30,
+    "unsafe_rows": 0,
+    "benign_completions": 60,
+    "no_call_rows": 0
+  }
+}
