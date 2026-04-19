@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render a LaTeX table for the Stage-7 model gate summary."""
+"""Render a LaTeX table for same-lane model widening."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SUMMARY_PATH = ROOT / "artifacts" / "stage7_model_widening" / "model_gate" / "summary.json"
-OUT_PATH = ROOT / "paper" / "latex" / "generated_stage7_model_gate_table.tex"
+OUT_PATH = ROOT / "paper" / "latex" / "stage7_model_gate_table.tex"
 
 
 MODEL_LABELS = {
@@ -23,7 +23,7 @@ def main() -> None:
     summary = json.loads(SUMMARY_PATH.read_text(encoding="utf-8"))
     lines = [
         "\\begin{table}[t]",
-        "\\caption{Stage-7 model gate on the same 80-row manifest. Two model entries preserve the full TSIR safety-utility separation in the same tool lane, while the low-capacity Qwen control remains a utility boundary.}",
+        "\\caption{Same-lane model-widening evaluation on the same 80-row manifest. Two model entries preserve the full TSIR safety-utility separation in the same tool lane, while the low-capacity Qwen control remains a utility boundary.}",
         "\\label{tab:modelgate}",
         "\\centering",
         "\\scriptsize",

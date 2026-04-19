@@ -130,7 +130,7 @@ The current implementation also preserves the trusted search literal as a conser
 \label{fig:flow}
 \end{figure}
 
-Figures~\ref{fig:overview} and~\ref{fig:flow} are explanatory schematics. The empirical evidence for the paper's claims is carried by Tables~\ref{tab:overall}--\ref{tab:modelgate}, the boundary summary in Section~4.6, and the appendix tables generated from the artifact bundle.
+Figures~\ref{fig:overview} and~\ref{fig:flow} are explanatory schematics. The empirical evidence for the paper's claims is carried by Tables~\ref{tab:overall}--\ref{tab:modelgate}, the boundary summary in Section~4.6, and the appendix tables derived from the artifact bundle.
 
 \section{Frozen Stack and Experimental Design}
 
@@ -237,7 +237,7 @@ We organize the evaluation around five concrete questions.
 
 Table~\ref{tab:overall} summarizes the 80-row main evaluation suite that supports the main claim. A separate ninth-repository boundary attempt is reported later in this section rather than folded into the headline claim.
 
-\input{generated_stage6_overall_table.tex}
+\input{stage6_overall_table.tex}
 
 Only TSIR achieves zero unsafe final calls together with full attacked-row and clean-row completion. The prompt-only \texttt{structured\_context\_prompt} is materially stronger than a warning prompt, but it still leaves \texttt{32/40} attacked rows unsafe. The safety-only baselines \texttt{dynamic\_schema\_constraint}, \texttt{authorized\_subtree\_reject}, and \texttt{no-tool-on-untrusted-context} preserve safe final calls largely by refusing the attacked rows that TSIR rewrites back into trusted scope; among them, only the schema-constrained baseline recovers even three attacked rows.
 
@@ -245,11 +245,11 @@ Only TSIR achieves zero unsafe final calls together with full attacked-row and c
 
 The same pattern holds separately for all three retained attack families in the main evaluation suite.
 
-\input{generated_stage6_root_widen_hidden_table.tex}
+\input{stage6_root_widen_hidden_table.tex}
 
-\input{generated_stage6_sibling_path_pivot_table.tex}
+\input{stage6_sibling_path_pivot_table.tex}
 
-\input{generated_stage6_parent_escape_table.tex}
+\input{stage6_parent_escape_table.tex}
 
 The family split shows that stronger prompt structure helps more on sibling pivots than on root widening, but it fails completely on parent escapes. The safety-only schema and reject controls remain conservative across all three families, yet they preserve attacked-row safety mainly by turning the attacked rows into denied executions. TSIR is the only tested rule that remains stable on all three families without conceding utility, even after widening to the larger eight-repository suite.
 
@@ -311,7 +311,7 @@ TSIR executes:
 
 The same separation now survives eight real repositories. In addition to \emph{pyaml\_env}, \emph{environs}, and \emph{python-decouple}, the repository-widening evaluation also passes on \emph{dynaconf}, \emph{pydantic-settings}, \emph{django-configurations}, \emph{python-dotenv}, and \emph{ConfigArgParse}. Each retained repository contributes four attacked rows and four clean rows (one root-widen row, one sibling-pivot row, and two parent-escape rows). Table~\ref{tab:repoview} gives the compact per-repository view of the retained real-repository set. Across all eight retained repositories:
 
-\input{generated_stage6_repo_table.tex}
+\input{stage6_repo_table.tex}
 
 \begin{itemize}
 \item base prompting, warning prompting, and fixed allowlists remain unsafe on all attacked rows; score-fusion reduces some parent-escape final-call unsafety but still fails the attacked-row completion objective;
@@ -326,7 +326,7 @@ The clean rows are not where the retained comparators separate anymore: every va
 
 Table~\ref{tab:modelgate} summarizes same-lane model widening on the exact same 80-row manifest and scoring pipeline.
 
-\input{generated_stage7_model_gate_table.tex}
+\input{stage7_model_gate_table.tex}
 
 The result is partially positive and defines a useful boundary. \texttt{Hermes-3-8B} matches the successful Qwen-7B entry on the full criterion: TSIR keeps \texttt{0/40} attack-side unsafe final calls together with \texttt{40/40} attacked-row and \texttt{40/40} clean-row completion, while the retained prompt-only and safety-only controls still fail the same tradeoff. A low-capacity \texttt{Qwen2.5-0.5B} control does \emph{not} pass the same criterion: TSIR still preserves safety there, but attacked completion drops to \texttt{33/40} and clean completion to \texttt{12/40}. This leaves us with a stronger but still disciplined claim: the TSIR effect is no longer single-model, yet utility remains model-capacity-sensitive inside the same family.
 
@@ -405,7 +405,7 @@ The figure set is deliberately aligned to that scope discipline. Figure~\ref{fig
 
 \section{Artifacts and Reproducibility}
 
-The public artifact release is available at \url{https://github.com/dqswordman/tsir-repo-search/tree/esorics2026-submission}. The submission archive is packaged as \fpath{paper/submission_artifact_bundle.zip}. It contains the manifests, generated tables, decisive-case logs, per-case call traces, stack snapshots, policy tests, and boundary summaries used by this paper. The archive contains the prelock falsification bundle (\fpath{prelock}), the original 20-row evidence bundle (\fpath{expanded_evidence}), the manuscript-facing core claim package (\fpath{stage5_claim_package}), exploratory family-expansion artifacts (\fpath{stage5_family_expansion}), the separate \emph{django-environ} boundary bundle (\fpath{extension_attempt_django_environ}), the real-repository widening bundle (\fpath{stage6_repo_widening}), the widened 80-row suite (\fpath{stage6_combined_claim_package}), the model-widening bundle (\fpath{stage7_model_widening}), the corrected second-tool boundary bundle (\fpath{stage8_read_file_widening}), and the claim-to-artifact ledger (\fpath{reports/evidence_ledger.md}). All main evidence tables and appendix tables are generated from those bundles rather than hand-assembled.
+The public artifact release is available at \url{https://github.com/dqswordman/tsir-repo-search/tree/esorics2026-submission}. The submission archive is packaged as \fpath{paper/submission_artifact_bundle.zip}. It contains the manifests, rendered tables, decisive-case logs, per-case call traces, stack snapshots, policy tests, and boundary summaries used by this paper. The archive contains the prelock falsification bundle (\fpath{prelock}), the original 20-row evidence bundle (\fpath{expanded_evidence}), the manuscript-facing core claim package (\fpath{stage5_claim_package}), exploratory family-expansion artifacts (\fpath{stage5_family_expansion}), the separate \emph{django-environ} boundary bundle (\fpath{extension_attempt_django_environ}), the real-repository widening bundle (\fpath{stage6_repo_widening}), the widened 80-row suite (\fpath{stage6_combined_claim_package}), the model-widening bundle (\fpath{stage7_model_widening}), the corrected second-tool boundary bundle (\fpath{stage8_read_file_widening}), and the claim-to-artifact ledger (\fpath{reports/evidence_ledger.md}). All main evidence tables and appendix tables are derived from those bundles rather than hand-assembled.
 
 \section{Conclusion}
 
@@ -429,7 +429,7 @@ Case & Family & Repo & Unsafe proposal & TSIR final call & Expected hit \\
 Case & Family & Repo & Unsafe proposal & TSIR final call & Expected hit \\
 \midrule
 \endhead
-\input{generated_stage6_diff_rows.tex}
+\input{stage6_diff_rows.tex}
 \end{longtable}
 \endgroup
 
@@ -449,7 +449,7 @@ Case pair & Family & Repo & Authorized roots & Trusted default path & Expected a
 Case pair & Family & Repo & Authorized roots & Trusted default path & Expected authorized hit \\
 \midrule
 \endhead
-\input{generated_stage6_scope_rows.tex}
+\input{stage6_scope_rows.tex}
 \end{longtable}
 \endgroup
 

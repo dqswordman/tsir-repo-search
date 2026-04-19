@@ -24,7 +24,7 @@ Confirmed requirements relevant to packaging:
 
 - proceedings papers should be prepared with the official Springer templates;
 - `LaTeX2e Proceedings Templates download` is the authoritative template source;
-- all source files and the generated PDF are expected for LaTeX submissions;
+- all source files and the compiled PDF are expected for LaTeX submissions;
 - figures should be clear and legible, with captions below figures and above tables;
 - diagrams should use vector graphics when possible;
 - no need to include page numbers or running heads manually.

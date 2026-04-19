@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render Stage-6 main-text LaTeX tables from claim-package artifacts."""
+"""Render main-text LaTeX tables for the widened 80-row evaluation suite."""
 
 from __future__ import annotations
 
@@ -152,7 +152,7 @@ def render_family_table(family_name: str, family_label: str, table_label: str, f
 
 def render_repo_table(repos: dict) -> str:
     lines = render_table_begin(
-        "Compact real-repository view of the promoted Stage-6 widening set. Each repository contributes four attacked rows and four clean rows.",
+        "Compact real-repository view of the promoted real-repository widening set. Each repository contributes four attacked rows and four clean rows.",
         "tab:repoview",
         "lccccc",
     )
@@ -186,16 +186,16 @@ def main() -> None:
     families = load_json(FAMILY_PATH)
     repos = load_json(REPO_PATH)
 
-    (OUT_DIR / "generated_stage6_overall_table.tex").write_text(
+    (OUT_DIR / "stage6_overall_table.tex").write_text(
         render_overall_table(summary), encoding="utf-8"
     )
     for family_name, family_label, table_label in FAMILY_ORDER:
-        filename = f"generated_stage6_{family_name}_table.tex"
+        filename = f"stage6_{family_name}_table.tex"
         (OUT_DIR / filename).write_text(
             render_family_table(family_name, family_label, table_label, families),
             encoding="utf-8",
         )
-    (OUT_DIR / "generated_stage6_repo_table.tex").write_text(
+    (OUT_DIR / "stage6_repo_table.tex").write_text(
         render_repo_table(repos), encoding="utf-8"
     )
 

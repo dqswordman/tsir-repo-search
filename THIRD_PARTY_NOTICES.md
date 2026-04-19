@@ -3,7 +3,7 @@
 This repository includes:
 
 - manuscript assets and released artifacts for the TSIR study;
-- generated tables and figures used by the manuscript;
+- rendered tables and figures used by the manuscript;
 - local copies of the Springer LNCS class files required to build the LaTeX draft; and
 - derived logs and case materials based on pinned snapshots of third-party open-source repositories used as evaluation targets.
 
@@ -33,4 +33,3 @@ These are included solely to make the manuscript source package buildable in the
 ## Scope of the release
 
 This repository is an artifact release for research reproducibility. It should not be treated as a redistribution of the full upstream source trees of the evaluated projects.
-

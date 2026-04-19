@@ -8,8 +8,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ROOT / "artifacts" / "stage6_combined_claim_package"
-DEST_DIFF = ROOT / "paper" / "latex" / "generated_stage6_diff_rows.tex"
-DEST_SCOPE = ROOT / "paper" / "latex" / "generated_stage6_scope_rows.tex"
+DEST_DIFF = ROOT / "paper" / "latex" / "stage6_diff_rows.tex"
+DEST_SCOPE = ROOT / "paper" / "latex" / "stage6_scope_rows.tex"
 
 
 REPO_CODE = {
