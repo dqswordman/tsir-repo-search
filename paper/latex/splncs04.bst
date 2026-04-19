@@ -34,7 +34,7 @@
 %% - Added doi
 %% ================================================================================================
 %% This was file `titto.bst',
-%% generated with the docstrip utility.
+%% produced with the docstrip utility.
 %%
 %% The original source files were:
 %%
@@ -45,10 +45,10 @@
 %% Copyright 1994-2007 Patrick W Daly
  % ===============================================================
  % IMPORTANT NOTICE:
- % This bibliographic style (bst) file has been generated from one or
+ % This bibliographic style (bst) file has been produced from one or
  % more master bibliographic style (mbs) files, listed above.
  %
- % This generated file can be redistributed and/or modified under the terms
+ % This produced file can be redistributed and/or modified under the terms
  % of the LaTeX Project Public License Distributed from CTAN
  % archives in directory macros/latex/base/lppl.txt; either
  % version 1 of the License, or any later version.
